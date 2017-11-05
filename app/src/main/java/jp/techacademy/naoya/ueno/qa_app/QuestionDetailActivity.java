@@ -5,9 +5,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -27,7 +27,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private ListView mListView;
     private Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
-    private int mGenre;
+    private EditText mFavoriteFlag;
 
     private DatabaseReference mAnswerRef;
 
@@ -48,9 +48,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
-            String favorite = (String) map.get("favorite");
 
-            Answer answer = new Answer(body, name, uid, answerUid, favorite);
+            Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
             mAdapter.notifyDataSetChanged();
         }
@@ -96,6 +95,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
         // ログイン済みのユーザーを取得する
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
+        // お気に入りを取得する
+        final FirebaseAuth favorite = FirebaseAuth.getInstance();
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,14 +125,30 @@ public class QuestionDetailActivity extends AppCompatActivity {
         if (user == null) {
             imageButton.setVisibility(View.INVISIBLE);
         } else {
-            answerRef.updateChildren(data);
+            // Preferenceからお気に入りを取得してImageButtonに反映させる
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            String favoriteFlag = sp.getString(Const.FavoriteKEY, "");
+
+            if (favoriteFlag == "true") {
+                imageButton.setSelected(true);
+            } else {
+                imageButton.setSelected(false);
+            }
+
+            imageButton.setVisibility(View.VISIBLE);
         }
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                data.put("favorite", "true");
+                data.put("favorite", !imageButton.isSelected());
                 answerRef.updateChildren(data);
+
+                // Preferenceに保存する
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString(Const.FavoriteKEY, String.valueOf(!imageButton.isSelected()));
+                editor.commit();
 
                 imageButton.setSelected(!imageButton.isSelected());
             }

@@ -1,5 +1,6 @@
 package jp.techacademy.naoya.ueno.qa_app;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -49,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
             String body = (String) map.get("body");
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
-            String favorite = (String) map.get("favorite");
             String imageString = (String) map.get("image");
             byte[] bytes;
             if (imageString != null) {
@@ -66,12 +66,12 @@ public class MainActivity extends AppCompatActivity {
                     String answerBody = (String) temp.get("body");
                     String answerName = (String) temp.get("name");
                     String answerUid = (String) temp.get("uid");
-                    Answer answer = new Answer(answerBody, answerName, answerUid, (String) key, favorite);
+                    Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
                     answerArrayList.add(answer);
                 }
             }
 
-            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, favorite, bytes, answerArrayList);
+            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
             mQuestionArrayList.add(question);
             mAdapter.notifyDataSetChanged();
         }
@@ -92,8 +92,7 @@ public class MainActivity extends AppCompatActivity {
                             String answerBody = (String) temp.get("body");
                             String answerName = (String) temp.get("name");
                             String answerUid = (String) temp.get("uid");
-                            String answerFavorite = (String) temp.get("favorite");
-                            Answer answer = new Answer(answerBody, answerName, answerUid, (String) key, answerFavorite);
+                            Answer answer = new Answer(answerBody, answerName, answerUid, (String) key);
                             question.getAnswers().add(answer);
                         }
                     }
@@ -160,6 +159,17 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        // ログイン済みのユーザーを取得する
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // ログインしていない場合はお気に入りを非表示
+        View navFavorite = findViewById(R.id.nav_favorite);
+        if (user == null) {
+            navFavorite.setVisibility(View.INVISIBLE);
+        } else {
+            navFavorite.setVisibility(View.VISIBLE);
+        }
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -194,12 +204,8 @@ public class MainActivity extends AppCompatActivity {
                 // 選択したジャンルにリスナーを登録する
                 if (mGenreRef != null) {
                     mGenreRef.removeEventListener(mEventListener);
-                } else if (mGenre == 5) {
-                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(Question.getGenre())).child(Question.getFavorite()).equalTo(true);
-                } else {
-                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                 }
-
+                mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                 mGenreRef.addChildEventListener(mEventListener);
                 return true;
             }

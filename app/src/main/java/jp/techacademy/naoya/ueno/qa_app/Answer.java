@@ -7,14 +7,12 @@ public class Answer implements Serializable {
     private String mName;
     private String mUid;
     private String mAnswerUid;
-    private String mFavorite;
 
-    public Answer(String body, String name, String uid, String answerUid, String favorite) {
+    public Answer(String body, String name, String uid, String answerUid) {
         mBody = body;
         mName = name;
         mUid = uid;
         mAnswerUid = answerUid;
-        mFavorite = favorite;
     }
 
     public String getBody() {
@@ -31,9 +29,5 @@ public class Answer implements Serializable {
 
     public String getAnswerUid() {
         return mAnswerUid;
-    }
-
-    public String getFavorite() {
-        return mFavorite;
     }
 }
