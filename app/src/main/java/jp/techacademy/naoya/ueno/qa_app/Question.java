@@ -9,8 +9,8 @@ public class Question implements Serializable {
     private String mName;
     private String mUid;
     private String mQuestionUid;
-    private int mGenre;
-    private String mFavorite;
+    private static int mGenre;
+    private static String mFavorite;
     private byte[] mBitmapArray;
     private ArrayList<Answer> mAnswerArrayList;
 
@@ -32,11 +32,9 @@ public class Question implements Serializable {
         return mQuestionUid;
     }
 
-    public String getFavorite() {
-        return mFavorite;
-    }
+    public static String getFavorite() { return mFavorite; }
 
-    public int getGenre() {
+    public static int getGenre() {
         return mGenre;
     }
 

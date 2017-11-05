@@ -115,32 +115,27 @@ public class QuestionDetailActivity extends AppCompatActivity {
             }
         });
 
+        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference answerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid());
+        final Map<String, Object> data = new HashMap<>();
+
         final ImageButton imageButton = (ImageButton) findViewById(R.id.FavoriteButton);
         if (user == null) {
             imageButton.setVisibility(View.INVISIBLE);
         } else {
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            String favorite = sp.getString(Const.LikeKEY, "");
-            imageButton.setSelected(Boolean.parseBoolean(favorite));
-            imageButton.setVisibility(View.VISIBLE);
+            answerRef.updateChildren(data);
         }
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
-                DatabaseReference answerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid());
-
-                Map<String, String> data = new HashMap<String, String>();
-
                 data.put("favorite", "true");
-                answerRef.push().setValue(data, this);
+                answerRef.updateChildren(data);
 
                 imageButton.setSelected(!imageButton.isSelected());
             }
         });
 
-        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
 
